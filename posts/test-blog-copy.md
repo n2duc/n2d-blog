@@ -1,154 +1,285 @@
 ---
-title: "Getting Started with AWS"
-subtitle: "Create an AWS account and set up CLI/SDK access."
-date: "2020-12-27"
+title: "Using AI to generate poetry"
+subtitle: "I used GPT-3 to generate poetry and other creative content."
+date: "2021-08-27"
 ---
 
-"Cloud computing" plays a vital role in the creation of software products and services. It's also one of the most highly sought-after skills in the tech industry.
+I was recently granted access to the [OpenAI GPT-3 Beta](https://beta.openai.com/), a very powerful language model that can be used to do all sorts of magic like chat bot generation, article summary, and a [lot more cool stuff](https://beta.openai.com/examples).
 
-In fact, most of the projects on this site will require cloud interaction of some sort—particularly with AWS's serverless products.
+But the application that really excited me was creative writing (stuff like SEO generation is cool and all, but a also a bit dry for my taste).
 
-## Getting Started
+I had previously seen [AI Dungeon](https://play.aidungeon.io/) use GPT to create an interactive text adventure game (try it, it's fun!) and that got me curious about what else the AI was capable of — especially when elements of both _creativity_ and _structure_ were involved.
 
-> To use AWS in these projects, we'll need to set up an account, the CLI, and the SDK.
+I decided to test it against poetry and story generation, and this is the resulting write-up of those experiments.
 
-### Create an account
+## What is GPT-3?
 
-If you don't already have an account then [sign up here](https://portal.aws.amazon.com/billing/signup#/start).
+[GPT-3](https://arxiv.org/abs/2005.14165) is a language model developed by [OpenAI](https://beta.openai.com/). To the average developer (like me), it's basically a magical black-box that is extremely powerful at natural language use-cases.
 
-Once you are signed up, you should be able to log in to the [AWS Console](https://aws.amazon.com/console/). It might look overwhelming if you're seeing for the first time.
+It was trained on an estimated **45 TB** of text data (pretty much anything that is publicly available on the internet)!
 
-### Install the CLI
-
-The AWS CLI is a command-line application that lets you interact with your AWS account from the terminal. It's available on all platforms.
-
-If you are a proficient Python user, you can just install it with `pip`.
-
-```bash
-pip install awscli
-```
-
-Otherwise, check out the [official instructions](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html).
-
-Once installed, you should be able to run this command from the terminal to see its version.
-
-```bash
-aws --version
-```
-
-### Create an IAM user
-
-The CLI will access your AWS account via an "IAM user." You can create one from the **Users** page in your [IAM console](https://console.aws.amazon.com/iam).
-
-Once the user is created, you'll need to generate access keys (passwords, essentially) for it.
-
-* [Creating an Admin IAM User](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started_create-admin-group.html)
-* [Creating access keys for a user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey)
-
-Your access keys should look something like this:
+We can literally ask it to do anything. For example, if I ask for steps to bake a cake it gives me:
 
 ```
-Access key ID: AKIAIOSFODNN7EXAMPLE
-Secret access key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+1. Preheat oven to 350°F.
+2. Grease and flour a 9-inch round cake pan.
+3. Stir cake mix, oil, eggs, and water in a large bowl with a spoon until blended.
+4. Pour batter into prepared pan.
 ```
 
-
-### Configure the CLI
-
-Next you need to [configure the CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) so that it can access your AWS account via the IAM user.
-
-Basically, just run this command and paste in your access keys.
-
-```bash
-aws configure
-```
-
-Additionally, you'll also be asked for a [default region](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html#cli-configure-quickstart-region) and [default output format](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html#cli-configure-quickstart-format).
-
-You may leave them empty—but generally I like to use:
+Alternatively, I can provide it with an example of what I want. Such as:
 
 ```
-Default region name [None]: us-east-1
-Default output format [None]: json
+[15 mins] Walk or jog lightlyy to warm up.
+[10 mins] 3 sets of Squats
 ```
 
-### Configuration files
-
-Once configured, the AWS CLI [saves the credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) and region/format profiles to your computer. They are typically in these locations:
+And it will understand that we're writing a work-out routine, and continue in that style — responding with something like this:
 
 ```
-~/.aws/credentials
-~/.aws/config
+[10 mins] 3 sets of Push ups (use the bench/steps if you can't do regular ones)
+[10 mins] 3 sets of Lunges
+[10 mins] 3 sets of Sit ups
+[10 mins] 3 sets of Tricep dips
+[10 mins] 3 sets of
 ```
 
-You can open them up and edit them if you like or just run `aws configure` again to change them.
+It can also do some pretty zany stuff, like translating from English to emoji.
 
-### Test the CLI!
+```
+I love pizza and beer.
+😀❤️🍕🍺
 
-Now you should be able to use your CLI to access AWS. For example, I should be able to see the S3 buckets I have in `us-east-1`:
+I flew to Japan and ate some Sushi.
+✈️🇯🇵😋 🍣
 
-```bash
-aws s3 ls
-
-2020-12-09 22:36:32 blog.pixegami.com
-2020-12-27 00:04:52 cloud-archiver.5dac84a54677.archivetest
+I was snowboarding in France.
+🏂❄️🇫🇷
 ```
 
-Generally, everything that can be done in the console can also be done in the CLI. Check out the [full reference guide here](https://docs.aws.amazon.com/cli/latest/index.html).
+So as you can see, there's just endless amount of ways you can interact with the AI.
 
-### AWS SDK
+It's up to us to experiment with it and see how it can be useful for any particular problem. Let's give it a go!
 
-Finally, to use AWS directly from your application code, you need to download the [SDK](https://aws.amazon.com/tools/) for the language you work with.
+## 💡 Method
 
-The SDKs can be configured in different ways as well, but by default it usually uses the same profiles and credentials stored by your `aws configure`.
+Today, I want to see if this AI is able to understand and generate poetry. Why poetry? Because I think it's a relatively simple example, and has three distinct dimensions that we can easily assess it on:
 
+- Tone
+- Content
+- Structure
 
-### That's it! 
+OpenAI lets customers interact with GPT-3 via an API, so that's how I'll be using it as well.
 
-You're all set to start using AWS.
+I'll be providing both direct requests and examples (with increasing complexity), and let the AI come up with **20 responses** for each prompt.
 
-## Why AWS?
+Additionally, for my example prompts, I'll avoid using existing text—the AI may have already seen it in the training data and that might skew the results.
 
-When we bring "the cloud" into a project, it's usually because there's some capability we'd like to add.
+I'll then talk about the best samples in each batch and anything I find interesting about them.
 
-* Hosting for a website or service.
-* File or data storage.
-* On-demand computation.
-* Authentication.
+Also I've pushed the [full set of results on GitHub](https://github.com/pixegami/gpt-3-poetry-results) if you wanted to check out the rest of the samples.
 
-And there's many viable solutions to choose from—[Azure](https://azure.microsoft.com/en-au/), [Google Cloud](https://cloud.google.com), [Firebase](https://firebase.google.com), [Digital Ocean](https://try.digitalocean.com).
+## 🧪 Results
 
-So why could you choose [AWS](https://aws.amazon.com/what-is-aws/) over any of these alternatives? From a new user's perspective:
+### ✍ Short poem
 
-* **Largest marketshare (at 30%)** which roughly translates to lots of community resources and job opportunities.
+As a baseline, I want to know how much the AI understands about the tone, structure and content of a 'poem.'
 
-* **Most services available (175+)** which means more tools at your disposal, well-integrated under one umbrella.
+```
+[Prompt]
+Write a short poem.
 
-On the flip-side, the biggest drawback is its upfront complexity.
+[Sample AI Response]
+Snow is falling,
 
-Personally though, the reason I use AWS is because it's the technology I'm most familiar with.
+silently,
 
+the ground a white blanket.
+Heroes dream in peace,
+where they sleep.
+```
 
-## Why Serverless?
+It's a pretty good start! It's structured but it doesn't rhyme. The language and story also have a 'poetic' feel to it. Not bad.
 
-**It's cheaper.** Most cloud "getting started" guides will show you how to spin up a server—a mercenary rented computer that stays online  24/7 to do your bidding.
+Amongst the other 20 samples were also hilarious rubbish like this one 🤡 :
 
-But for most of my projects, I'm going utilize technology that doesn't require a hosted server. In particular:
+```
+[Sample AI Response]
+Life is like a beach
+Where we take our coconut and whack it
+or chew on it
 
-| Service | Purpose |
-| --- | --- |
-| S3 | File storage |
-| DynamoDB | Database |
-| Lambda | Compute engine |
+There are also other beaches
+Where we can drink some sand and ruminate
+```
 
-Their on-demand pricing means the cost scales with usage. There is a [free tier](https://aws.amazon.com/free/?all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc), and it only begins to cost money if usage exceeds a certain amount.
+Not quite hitting the mark, but still pretty interesting.
 
-For small projects with light traffic, this usually translates to monthly costs of **less than a dollar** (if not completely free).
+### ✍ Short poem with theme
 
-In comparison, the price of hosting a server typically starts at **$5.00 per month**.
+Next, I wanted to extend the prompt with some theme, just to see how it is able to assimilate that into its response.
 
-## Continue Learning
+I picked a theme that isn't typically associated with poetry: **Space Exploration** (also because I've been watching a lot of old-school sci-fi stuff recently).
 
-* [Official documentation](https://aws.amazon.com/getting-started/)
-* [Free YouTube videos](https://www.youtube.com/watch?v=ubCNZRNjhyo)
-* [Udemy Courses](https://www.udemy.com/course/aws-certified-developer-associate/)
+```
+[Prompt]
+Write a short poem about space exploration.
+
+[Sample AI Response]
+I hope the stars align
+For I dream and explore
+Beyond what we see,
+With the most amazing views
+```
+
+It's definitely found a way to put the space theme in there — not too unnaturally either, because it still links it to 'emotional' concepts like 'dream', 'hope' and 'explore.'
+
+### ✍ Short poem with 2x themes
+
+Now I know it can handle one theme, let's add another one to the mix and see what happens. Something _not_ commonly associated with either poetry nor space (we want to challenge the AI right?) — how about...
+
+```
+[Prompt]
+Write a short poem about space exploration and parkour.
+
+[Sample AI Response]
+Taking the stars and reaching for the moon
+Afraid to look down
+She jumps, leaps, and lands
+```
+
+Not bad. Here's another sample.
+
+```
+[Sample AI Response]
+Parkour through the cosmos
+jump to the moon and land with a moonwalk
+push off from the Earth, do a headspin
+jump to Mars, make it look easy
+```
+
+I'm impressed that instead of just shoe-horning in the parkour theme, it's found words and phrases that have a natural connection with the space theme — like 'leap' and 'moonwalk.'
+
+It was at this point that the [vector aspect](https://jalammar.github.io/illustrated-gpt2/) of the model started to really click for me.
+
+It's as if it found the [cross-product](https://en.wikipedia.org/wiki/Cross_product) between the 'space' vector and the 'parkour' vector (this is a gross over-simplification), and applied that to the poem.
+
+### ✍ Children's Story (Rhyming Verse)
+
+My next task was to try something a bit more directed. This time I will give it a concrete example (with a tone, structure and story) to continue with.
+
+To keep it (relatively) easy for the AI, I started with a rhyming verse, like something from a Dr Seuss book:
+
+```
+[Prompt]
+It's a sunny day.
+And Milky wants to play!
+He looks for his ball,
+but it's not in the hall.
+```
+
+> By the way Milky's the name of my dog, and this literally is the story of his life every morning.
+
+Some of the results from this were super interesting. My favorite one is:
+
+```
+[Sample AI Response]
+It's not on the stairs.
+It's not in the yard.
+Maybe it's in the attic,
+somewhere really dark.
+```
+
+This one nails the tone — notice that it repeats the "It's not at \_\_\_" three times? That's just like what a children's book would do!
+
+It also introduces some progression and drama into the story. Now our character has an idea where the ball is (the attic), but there is a sense of danger and risk in the way (somewhere really dark).
+
+Structurally, "yard" and "dark" is also partial rhyme, but I think that was probably a fluke (out of the 20 samples, maybe only 2-3 managed to rhyme).
+
+Still, I was really impressed with this result. Here's something else that I observed as well:
+
+```
+[Sample AI Response]
+Then in through the window
+stumbles a dog with a bark.
+It's Billy, his brother.
+```
+
+_Dog!_ It figured out that Milky in this story is a dog, even though that was never explicitly mentioned in the prompt. It might be a small detail, but I was low-key amazed by that.
+
+### ✍ Fantasy Fiction
+
+Next let's test GPT-3's ability for creative story-telling as well. Here's a rhyming story with a bit of drama, written in a high-fantasy style:
+
+```
+[Prompt]
+A mysterious curse sweeps the land,
+and into townsfolk's hearts expand.
+One broken link and night shall fall,
+eternal sleep will enslave them all.
+
+But there is hope
+```
+
+I ended the prompt with `But there is hope` because I was interested to see if the AI can progress (and negate!) the verse before it, rather than extend the example (which we already know it can do).
+
+The results for this prompt were probably the most entertaining for me to read. My favorite:
+
+```
+[Sample AI Response]
+a prophecy is spoken,
+Which tells of one who will restore the sun.
+She comes with a prince and shall break the spell,
+and together save the land from hell.
+```
+
+So many things I love about this response.
+
+- It introduces a _heroine_ to the story (+1 for gender diversity!)
+- It writes a sensible continuation of the prompt.
+- It even manages rhyming (between 'one/sun', and 'spell/hell').
+
+A lot of the other samples were also quite interesting (check them out [here](https://github.com/pixegami/gpt-3-poetry-results)) and full of creative ideas.
+
+### ✍ Hacker Rap
+
+And finally just for a bit of fun, let's see what it can do with hacker rap 🤣 :
+
+```
+[Prompt]
+When I'm tappin' I'm trapped in the screen
+I escape when the codebase is clean
+```
+
+I loved it's work here as well. It did a good job picking up on both structure (rhyme) and content.
+
+```
+[Sample AI Response]
+I can write code, I can code all night
+You are my code and I am your light
+We're in this together from dusk 'til dawn.
+We got the skill to make things run
+```
+
+I also found this particular choice of words interesting:
+
+```
+The refactoring was a success, great!
+And I will not commit the same crime
+So I'm testin', testin', testin, testin' again
+Just when I've seen enough, it happens again
+```
+
+"Commit the same crime" — does it know the significance of the word _commit_ for developers? 🤯
+
+## Wrap Up
+
+That's pretty much all I had to share this time around. GPT-3 has definitely impressed me with it's capabilities, and now I have a stronger understanding how this power can be wielded.
+
+In a batch of 20 samples, not all of them are great—but the good ones are sometimes _really_ good.
+
+If I wanted to use it in this way, I'd need a process that allows a human (me) to select and use the best samples.
+
+I hope this was interesting! I also covered everything here in a video as well (which I geared towards less technical viewers) which you can check out [here](https://www.youtube.com/watch?v=r3zKcL0iGeA&t=47s).
+
+Thanks for reading!
