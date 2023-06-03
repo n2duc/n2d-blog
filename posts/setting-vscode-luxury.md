@@ -4,13 +4,13 @@ subtitle: "Hướng đẫn setup VSCode một cách tối ưu và đẹp nhất,
 date: "2023-06-03"
 ---
 
-"Cloud computing" plays a vital role in the creation of software products and services. It's also one of the most highly sought-after skills in the tech industry.
+"Visual Studio Code" là một công cụ editor vô cùng nhẹ và tiện lợi, chắc hẳn anh em làm dev quá quen thuộc rồi đúng không. Nhưng để tối ưu cũng như thiết lập sao cho nó trở nên hoàn hảo, cũng như bắt mắt khi code ( Minh làm FrontEnd nên cái đẹp là trên hết :v )
 
-In fact, most of the projects on this site will require cloud interaction of some sort—particularly with AWS's serverless products.
+Nếu như mọi người chưa biết về [**VSCode**](https://code.visualstudio.com/) thì đây chính là cơ hội để tìm hiểu và thiết lập môi trường phát triển sản phẩm. Ở bài này mình sẽ chia sẻ setting của mình và cách thiết lập cho nó trở nên màu mè nhất có thể.
 
-## Getting Started
+## Bắt đầu thôi nào
 
-> To use AWS in these projects, we'll need to set up an account, the CLI, and the SDK.
+Đầu tiên khi các bạn tải VSCode về thì giao diện nhìn khá tương đối và bonus thêm 2 gợi ý theme rất chi là ối dồi ôi.
 
 ### Create an account
 
